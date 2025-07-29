@@ -8,7 +8,7 @@ class Snake:
         self.direction_x = taille_bloc
         self.direction_y = 0
         self.positions = []
-        self.taille = 1
+        self.taille = 3
 
     def changer_direction(self, direction):
         if direction == "GAUCHE" and self.direction_x == 0:
@@ -31,11 +31,15 @@ class Snake:
         if len(self.positions) > self.taille:
             del self.positions[0]
 
-    def collision_avec_bords(self, largeur, hauteur):
+    def collision_avec_bords(self):
         return (
             self.x < 150 or self.x >= 1050 or
             self.y < 50 or self.y >= 850 
         )
+    
+    def eatApple(self):
+        self.taille += 1
+        
 
     def collision_avec_soi_meme(self):
         return [self.x, self.y] in self.positions[:-1]

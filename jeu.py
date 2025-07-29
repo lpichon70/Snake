@@ -1,6 +1,7 @@
 # Example file showing a basic pygame "game loop"
 import pygame, sys, random
 from snake import Snake 
+from apple import Apple 
 
 class Jeu:
     def __init__(self):
@@ -15,6 +16,7 @@ class Jeu:
         self.ecran_debut = True
         self.Jeu_encours = False
         self.snake = Snake(self.largeur // 2, self.hauteur // 2)
+        self.apple = Apple()
         
     def principale(self):
         """Page d'accueil du jeu
@@ -66,12 +68,17 @@ class Jeu:
                     elif event.key == pygame.K_DOWN:
                         self.snake.changer_direction("BAS")
 
+            next_x = self.snake.x + self.snake.direction_x
+            next_y = self.snake.y + self.snake.direction_y
+
+            # Vérifier la collision avec la pomme à la prochaine position
+            if [next_x, next_y] == [self.apple.x, self.apple.y]:
+                self.snake.eatApple()
+                self.apple.relocate()
+                
             self.snake.deplacer()
 
-            if self.snake.collision_avec_bords(self.largeur, self.hauteur):
-                self.Jeu_encours = False
-
-            if self.snake.collision_avec_soi_meme():
+            if self.snake.collision_avec_bords() or self.snake.collision_avec_soi_meme() :
                 self.Jeu_encours = False
 
             self.afficher()
@@ -83,6 +90,7 @@ class Jeu:
         titre_rect = pygame.Rect(150, 50, self.ecran.get_width() - 300, self.ecran.get_height() - 100)
         pygame.draw.rect(self.ecran, (255, 255, 255), titre_rect, width=4, border_radius=0)
         self.snake.dessiner(self.ecran)
+        self.apple.draw(self.ecran)
         pygame.display.flip()
         self.clock.tick(20)  # vitesse du jeu
 
