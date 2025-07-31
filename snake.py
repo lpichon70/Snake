@@ -33,8 +33,8 @@ class Snake:
 
     def collision_avec_bords(self):
         return (
-            self.x < 150 or self.x >= 1050 or
-            self.y < 50 or self.y >= 850 
+            self.x < (150+self.taille_bloc) or self.x >= (1050-self.taille_bloc) or
+            self.y < (50+self.taille_bloc) or self.y >= (750-self.taille_bloc) 
         )
     
     def eatApple(self):
