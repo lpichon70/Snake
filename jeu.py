@@ -5,7 +5,7 @@ from apple import Apple
 
 class Jeu:
     def __init__(self):
-        """Contructeur de la class
+        """Contructeur de la classe
         """
         pygame.init()
         self.largeur = 1200
@@ -47,15 +47,17 @@ class Jeu:
             pygame.draw.rect(self.ecran, (255, 255, 255), titre_rect, width=self.snake.taille_bloc, border_radius=10)
 
             # Affichage du titre et consignes
-            self.message_debut("grand", "SNAKE", (centre_x, 200), (0, 255, 0))
-            self.message_debut("petit", "Le but du jeu est de faire grandir le serpent", (centre_x - 100, 350), (0, 255, 0))
-            self.message_debut("petit", "Pour cela, il doit manger des pommes !", (centre_x + 100,425), (0, 255, 0))
-            self.message_debut("moyen", "Appuyez sur ENTRER pour commencer", (centre_x,550), (0, 255, 0))
+            self.message("grand", "SNAKE", (centre_x, 200), (0, 255, 0))
+            self.message("petit", "Le but du jeu est de faire grandir le serpent", (centre_x - 100, 350), (0, 255, 0))
+            self.message("petit", "Pour cela, il doit manger des pommes !", (centre_x + 100,425), (0, 255, 0))
+            self.message("moyen", "Appuyez sur ENTRER pour commencer", (centre_x,550), (0, 255, 0))
 
             pygame.display.flip()
             self.clock.tick(60)  # 60 FPS
 
     def endWindow(self):
+        """Page de fin du jeu (Game Over)
+        """
         pygame.display.set_caption("Snake - Game Over")
 
         centre_x = self.ecran.get_width() // 2
@@ -84,14 +86,18 @@ class Jeu:
             pygame.draw.rect(self.ecran, (255, 255, 255), titre_rect, width=self.snake.taille_bloc, border_radius=10)
 
             # Affichage du titre et consignes
-            self.message_debut("grand", "GAME OVER :(", (centre_x, centre_y-150), (0, 255, 0))
-            self.message_debut("moyen", "Score : " + str(self.score), (centre_x, centre_y-100), (0, 255, 0))
-            self.message_debut("moyen", "Appuyez sur ENTRER pour rejouer", (centre_x,centre_y+50), (0, 255, 0))
+            self.message("grand", "GAME OVER :(", (centre_x, centre_y-150), (0, 255, 0))
+            self.message("moyen", "Score : " + str(self.score), (centre_x, centre_y-100), (0, 255, 0))
+            self.message("moyen", "Appuyez sur ENTRER pour rejouer", (centre_x,centre_y+50), (0, 255, 0))
 
             pygame.display.flip()
             self.clock.tick(60) 
 
     def play(self):
+        """Fonctionnement du jeu principal
+        """
+        pygame.display.set_caption("Snake")
+
         while self.Jeu_encours:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -125,19 +131,21 @@ class Jeu:
             self.afficher()
 
     def afficher(self):
+        """Affiche les éléments sur la fenêtre
+        """
         self.ecran.fill((0, 0, 0))  # fond noir
         titre_rect = pygame.Rect(150, 50, self.ecran.get_width() - 300, self.ecran.get_height() - 100)
         pygame.draw.rect(self.ecran, (255, 255, 255), titre_rect, width=self.snake.taille_bloc, border_radius=0)
         # Affichage du score
         message = "SCORE : " + str(self.score) 
-        self.message_debut("grand", message, (100, 20), (0, 255, 0))
+        self.message("grand", message, (100, 20), (0, 255, 0))
         self.snake.dessiner(self.ecran)
         self.apple.draw(self.ecran)
         pygame.display.flip()
-        self.clock.tick(20)  # vitesse du jeu
+        self.clock.tick(15)  # vitesse du jeu
 
-    def message_debut(self, font, message, position, couleur):
-        """Fonction de gestion des label pour la page d'accueil
+    def message(self, font, message, position, couleur):
+        """Fonction de gestion des label
 
         Args:
             font (string): Taille de la police (petit,moyen,grand)
