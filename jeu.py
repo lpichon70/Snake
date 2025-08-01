@@ -1,0 +1,171 @@
+# Example file showing a basic pygame "game loop"
+import pygame, sys
+from snake import Snake 
+from apple import Apple 
+
+class Jeu:
+    def __init__(self):
+        """Contructeur de la classe
+        """
+        pygame.init()
+        self.largeur = 1200
+        self.hauteur = 800
+        self.ecran = pygame.display.set_mode((self.largeur, self.hauteur))
+        self.clock = pygame.time.Clock()
+        self.ecran_debut = True
+        self.end_Window = True
+        self.Jeu_encours = False
+        self.snake = Snake(self.largeur // 2, self.hauteur // 2)
+        self.apple = Apple()
+        self.score = 0
+        
+    def principale(self):
+        """Page d'accueil du jeu
+        """
+        pygame.display.set_caption("Snake - Écran de démarrage")
+
+        centre_x = self.ecran.get_width() // 2
+
+        while self.ecran_debut:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        self.ecran_debut = False 
+                        self.Jeu_encours = True
+                        self.play()
+                        
+
+            # Couleur de fond (noir ici)
+            self.ecran.fill((0, 0, 0))
+
+
+            titre_rect = pygame.Rect(150, 50, self.ecran.get_width() - 300, self.ecran.get_height() - 100)
+            pygame.draw.rect(self.ecran, (255, 255, 255), titre_rect, width=self.snake.taille_bloc, border_radius=10)
+
+            # Affichage du titre et consignes
+            self.message("grand", "SNAKE", (centre_x, 200), (0, 255, 0))
+            self.message("petit", "Le but du jeu est de faire grandir le serpent", (centre_x - 100, 350), (0, 255, 0))
+            self.message("petit", "Pour cela, il doit manger des pommes !", (centre_x + 100,425), (0, 255, 0))
+            self.message("moyen", "Appuyez sur ENTRER pour commencer", (centre_x,550), (0, 255, 0))
+
+            pygame.display.flip()
+            self.clock.tick(60)  # 60 FPS
+
+    def endWindow(self):
+        """Page de fin du jeu (Game Over)
+        """
+        pygame.display.set_caption("Snake - Game Over")
+
+        centre_x = self.ecran.get_width() // 2
+        centre_y = self.ecran.get_height() // 2
+
+        while self.end_Window:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        self.snake = Snake(self.largeur // 2, self.hauteur // 2)
+                        self.apple = Apple()
+                        self.score = 0
+                        self.end_Window = False 
+                        self.Jeu_encours = True
+                        self.play()
+
+            # Couleur de fond (noir ici)
+            self.ecran.fill((0, 0, 0))
+
+
+            titre_rect = pygame.Rect(150, 50, self.ecran.get_width() - 300, self.ecran.get_height() - 100)
+            pygame.draw.rect(self.ecran, (255, 255, 255), titre_rect, width=self.snake.taille_bloc, border_radius=10)
+
+            # Affichage du titre et consignes
+            self.message("grand", "GAME OVER :(", (centre_x, centre_y-150), (0, 255, 0))
+            self.message("moyen", "Score : " + str(self.score), (centre_x, centre_y-100), (0, 255, 0))
+            self.message("moyen", "Appuyez sur ENTRER pour rejouer", (centre_x,centre_y+50), (0, 255, 0))
+
+            pygame.display.flip()
+            self.clock.tick(60) 
+
+    def play(self):
+        """Fonctionnement du jeu principal
+        """
+        pygame.display.set_caption("Snake")
+
+        while self.Jeu_encours:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.Jeu_encours = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        self.snake.changer_direction("GAUCHE")
+                    elif event.key == pygame.K_RIGHT:
+                        self.snake.changer_direction("DROITE")
+                    elif event.key == pygame.K_UP:
+                        self.snake.changer_direction("HAUT")
+                    elif event.key == pygame.K_DOWN:
+                        self.snake.changer_direction("BAS")
+
+            next_x = self.snake.x + self.snake.direction_x
+            next_y = self.snake.y + self.snake.direction_y
+
+            # Vérifier la collision avec la pomme à la prochaine position
+            if [next_x, next_y] == [self.apple.x, self.apple.y]:
+                self.snake.eatApple()
+                self.apple.relocate()
+                self.score += 1
+                
+            self.snake.deplacer()
+
+            if self.snake.collision_avec_bords() or self.snake.collision_avec_soi_meme() :
+                self.Jeu_encours = False
+                self.end_Window = True
+                self.endWindow()
+
+            self.afficher()
+
+    def afficher(self):
+        """Affiche les éléments sur la fenêtre
+        """
+        self.ecran.fill((0, 0, 0))  # fond noir
+        titre_rect = pygame.Rect(150, 50, self.ecran.get_width() - 300, self.ecran.get_height() - 100)
+        pygame.draw.rect(self.ecran, (255, 255, 255), titre_rect, width=self.snake.taille_bloc, border_radius=0)
+        # Affichage du score
+        message = "SCORE : " + str(self.score) 
+        self.message("grand", message, (100, 20), (0, 255, 0))
+        self.snake.dessiner(self.ecran)
+        self.apple.draw(self.ecran)
+        pygame.display.flip()
+        self.clock.tick(15)  # vitesse du jeu
+
+    def message(self, font, message, position, couleur):
+        """Fonction de gestion des label
+
+        Args:
+            font (string): Taille de la police (petit,moyen,grand)
+            message (string): Contenu du message à afficher
+            position (int,int): Position du text dans la page
+            couleur (int,int,int): Couleur du text
+        """
+        
+        if font == "petit":
+            police = pygame.font.SysFont("arial", 20, True)
+        elif font == "moyen":
+            police = pygame.font.SysFont("arial", 25, True)
+        elif font == "grand":
+            police = pygame.font.SysFont("arial", 35, True)
+        else:
+            police = pygame.font.SysFont("arial", 30, True)
+
+        texte = police.render(message, True, couleur)
+        texte_rect = texte.get_rect(center=position)
+        self.ecran.blit(texte, texte_rect)
+
+    
+
